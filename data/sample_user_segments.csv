@@ -1,0 +1,17 @@
+user_id,cluster,x,y,z,total_spend,order_count,avg_order_value,review_score,return_rate,top_category,recency_days
+U0001,Premium Loyalists,2.4,1.8,2.8,1820,34,53.5,4.8,0.03,Electronics,7
+U0002,Premium Loyalists,2.8,1.6,2.4,1640,29,56.6,4.7,0.04,Home,11
+U0003,Premium Loyalists,2.1,2.2,2.9,2110,41,51.5,4.9,0.02,Beauty,5
+U0004,Premium Loyalists,2.6,1.9,2.6,1975,37,53.4,4.8,0.03,Electronics,9
+U0005,Bargain Hunters,-1.9,2.7,-0.4,420,18,23.3,4.1,0.06,Kitchen,19
+U0006,Bargain Hunters,-2.2,2.4,-0.7,360,16,22.5,4.0,0.08,Books,25
+U0007,Bargain Hunters,-1.6,3.0,-0.2,510,23,22.2,4.2,0.07,Kitchen,14
+U0008,Bargain Hunters,-2.0,2.9,-0.5,455,20,22.8,4.1,0.05,Beauty,21
+U0009,Occasional Buyers,-0.5,-1.9,0.8,230,5,46.0,3.9,0.11,Home,64
+U0010,Occasional Buyers,-0.2,-2.3,0.5,180,4,45.0,3.8,0.12,Books,72
+U0011,Occasional Buyers,-0.7,-1.6,0.9,310,7,44.3,4.0,0.09,Electronics,53
+U0012,Occasional Buyers,-0.4,-2.0,0.7,260,6,43.3,3.7,0.10,Home,68
+U0013,High Risk Returners,1.7,-1.4,-2.2,890,22,40.5,3.2,0.31,Fashion,13
+U0014,High Risk Returners,1.4,-1.8,-2.5,760,19,40.0,3.1,0.28,Fashion,17
+U0015,High Risk Returners,1.9,-1.1,-2.1,940,24,39.2,3.3,0.35,Electronics,10
+U0016,High Risk Returners,1.5,-1.6,-2.7,820,21,39.0,3.0,0.33,Fashion,15
