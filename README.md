@@ -43,3 +43,5 @@ Recommended columns:
 ```text
 actual_price, discount_percentage, sentiment_score, rating_gap, rating, rating_count, category
 ```
+
+안녕하세요!
