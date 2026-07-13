@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-
+from model2_trust_tab import render as render_trust_tab
 
 APP_DIR = Path(__file__).parent
 DATA_PATH = APP_DIR / "data" / "user_segments.csv"
@@ -620,11 +620,11 @@ def main() -> None:
     selected_segments, price_range, gap_range = render_sidebar(df)
     filtered = apply_filters(df, selected_segments, price_range, gap_range)
 
-    tab1, tab2, tab3 = st.tabs(["1. Product Segmentation", "2. Teammate Analysis", "3. Teammate Analysis"])
+    tab1, tab2, tab3 = st.tabs(["1. Product Segmentation", "2. Review Trust Score", "3. Teammate Analysis"])
     with tab1:
         render_first_tab(filtered)
     with tab2:
-        render_teammate_tab(2)
+        render_trust_tab()
     with tab3:
         render_teammate_tab(3)
 

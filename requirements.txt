@@ -2,3 +2,8 @@ streamlit>=1.36
 pandas>=2.2
 numpy>=1.26
 plotly>=5.22
+joblib
+nltk
+plotly
+scikit-learn
+kagglehub
