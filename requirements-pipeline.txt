@@ -1,0 +1,7 @@
+# 데이터 재생성용 — python scripts/export_segments.py
+# 대시보드만 실행할 거면 requirements.txt 만 설치하면 된다.
+-r requirements.txt
+
+scikit-learn>=1.5
+kagglehub>=0.3
+textblob>=0.18

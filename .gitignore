@@ -1,7 +1,21 @@
+# Python
 __pycache__/
 *.py[cod]
-*.log
-.streamlit/secrets.toml
-.env
 .venv/
 venv/
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# 환경 변수 / 비밀값
+.env
+
+# 로그
+*.log
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

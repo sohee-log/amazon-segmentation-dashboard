@@ -17,9 +17,11 @@ from sklearn.preprocessing import StandardScaler
 from textblob import TextBlob
 
 
-APP_DIR = Path(__file__).parent
-OUT_PATH = APP_DIR / "data" / "user_segments.csv"
-METRICS_PATH = APP_DIR / "data" / "model_metrics.csv"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUT_PATH = REPO_ROOT / "data" / "user_segments.csv"
+METRICS_PATH = REPO_ROOT / "data" / "model_metrics.csv"
+SAMPLE_PATH = REPO_ROOT / "data" / "sample_user_segments.csv"
+SAMPLE_ROWS = 40
 
 
 def clean_money_percent(df: pd.DataFrame) -> pd.DataFrame:
@@ -45,6 +47,8 @@ def sentiment(text: object) -> float:
 
 
 def main() -> None:
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
     dataset_path = Path(kagglehub.dataset_download("karkavelrajaj/amazon-sales-dataset"))
     csv_files = sorted(dataset_path.glob("*.csv"))
     if not csv_files:
@@ -140,9 +144,14 @@ def main() -> None:
         "pca2_variance",
         "pca3_variance",
     ]
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    result[columns].to_csv(OUT_PATH, index=False)
-    print(f"Wrote {len(result):,} rows to {OUT_PATH}")
+    export = result[columns]
+    export.to_csv(OUT_PATH, index=False)
+
+    # 대시보드는 user_segments.csv가 없으면 이 샘플로 폴백하므로 스키마가 같아야 한다.
+    export.groupby("cluster", group_keys=False).head(SAMPLE_ROWS // final_k).to_csv(SAMPLE_PATH, index=False)
+
+    print(f"Wrote {len(export):,} rows to {OUT_PATH}")
+    print(f"Wrote sample rows to {SAMPLE_PATH}")
     print(f"Final algorithm: {final_algo}")
 
 
