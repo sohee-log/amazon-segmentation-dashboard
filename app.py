@@ -19,14 +19,41 @@ SEGMENT_NAMES = {
     "2": "가성비 호평 상품",
 }
 
-CLUSTER_COLORS = {
-    "0": "#ff5a5f",
-    "1": "#ff9900",
-    "2": "#00a8e1",
-    "관심 필요 상품": "#ff5a5f",
-    "프리미엄 베스트셀러": "#ff9900",
-    "가성비 호평 상품": "#00a8e1",
+# --- 디자인 토큰 -------------------------------------------------------------
+# 에디토리얼 톤: off-white 캔버스, 웜 니어블랙 잉크, 채도 높은 CTA 색 없음.
+INK = "#0c0a09"
+BODY = "#4e4e4e"
+MUTED = "#777169"
+HAIRLINE = "#e7e5e4"
+CANVAS = "#f5f5f5"
+SURFACE_CARD = "#ffffff"
+
+# 브랜드의 파스텔 orb(mint/peach/lavender/sky/rose)는 '분위기 전용'이라
+# 데이터 마크로 쓸 수 없다(off-white 위에서 대비가 무너짐).
+# 그래서 같은 hue 계보를 유지한 채 명도만 낮춘 데이터 전용 팔레트를 파생시킨다.
+# scripts/validate_palette 기준 전 항목 통과(대비·채도·색각 분리).
+SEGMENT_COLORS = {
+    "관심 필요 상품": "#b45309",      # peach 계보
+    "프리미엄 베스트셀러": "#2563a8",  # sky 계보
+    "가성비 호평 상품": "#0d9488",     # mint 계보
 }
+CLUSTER_COLORS = {
+    **SEGMENT_COLORS,
+    "0": SEGMENT_COLORS["관심 필요 상품"],
+    "1": SEGMENT_COLORS["프리미엄 베스트셀러"],
+    "2": SEGMENT_COLORS["가성비 호평 상품"],
+}
+
+# orb 는 순수 분위기 — 마크·텍스트에는 절대 쓰지 않는다.
+ORB_MINT = "#a7e5d3"
+ORB_PEACH = "#f4c5a8"
+ORB_LAVENDER = "#c8b8e0"
+ORB_SKY = "#a8c8e8"
+
+GRID = "rgba(12, 10, 9, 0.10)"
+AXIS_TEXT = "#777169"
+# 차트 내 한글도 시스템 고딕으로 떨어지지 않게 본문 스택과 동일하게 맞춘다.
+PLOT_FONT = "Inter, Noto Sans KR, sans-serif"
 
 
 st.set_page_config(
@@ -41,13 +68,48 @@ def inject_css() -> None:
     st.markdown(
         """
         <style>
+        /* display 는 Noto Serif KR 300 단일 패밀리.
+           Waldenburg(라이선스)의 대체로 Cormorant Garamond 를 라틴에 물려봤으나,
+           한글은 글리프가 없어 Noto Serif KR 이 받게 되면서 한 헤딩 안에서
+           cap-height 가 어긋나고 Cormorant 의 올드스타일 숫자 탓에 "3D" 가
+           "₃D" 로 읽히는 문제가 있었다. 화면이 대부분 한글이므로 라틴·한글이
+           한 폰트 안에서 조화되는 Noto Serif KR 로 통일한다 — weight 300 유지.
+           본문은 Inter + Noto Sans KR 로 고정해 OS 별 폴백 편차를 없앤다. */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500&display=swap');
+
         :root {
-            --amazon-orange: #ff9900;
-            --amazon-blue: #00a8e1;
-            --panel: rgba(255, 255, 255, 0.055);
-            --panel-strong: rgba(255, 255, 255, 0.092);
-            --stroke: rgba(255, 255, 255, 0.13);
-            --muted: rgba(245, 247, 251, 0.68);
+            --ink: #0c0a09;
+            --body: #4e4e4e;
+            --muted: #777169;
+            --muted-soft: #a8a29e;
+            --canvas: #f5f5f5;
+            --canvas-soft: #fafafa;
+            --surface-card: #ffffff;
+            --surface-strong: #f0efed;
+            --hairline: #e7e5e4;
+            --hairline-soft: #f0efed;
+            --hairline-strong: #d6d3d1;
+            --primary: #292524;
+            --primary-active: #0c0a09;
+            --on-primary: #ffffff;
+
+            --orb-mint: #a7e5d3;
+            --orb-peach: #f4c5a8;
+            --orb-lavender: #c8b8e0;
+            --orb-sky: #a8c8e8;
+            --orb-rose: #e8b8c4;
+
+            /* 라틴·한글을 한 패밀리로 — 혼용 헤딩에서 크기가 어긋나지 않는다. */
+            --display: 'Noto Serif KR', 'EB Garamond', serif;
+            --sans: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+
+            --rounded-md: 8px;
+            --rounded-lg: 12px;
+            --rounded-xl: 16px;
+            --rounded-xxl: 24px;
+            --rounded-pill: 9999px;
+
+            --soft-drop: 0 4px 16px rgba(0, 0, 0, 0.04);
         }
 
         header[data-testid="stHeader"] {
@@ -56,125 +118,342 @@ def inject_css() -> None:
         }
 
         .stApp {
-            background:
-                radial-gradient(circle at 16% 4%, rgba(255,153,0,0.14), transparent 24%),
-                linear-gradient(135deg, #0f1115 0%, #151b22 48%, #10151b 100%);
+            background: var(--canvas);
         }
 
+        html, body, [data-testid="stAppViewContainer"] {
+            font-family: var(--sans);
+            color: var(--body);
+            letter-spacing: 0.16px;
+        }
+
+        /* ── 사이드바 ── */
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #12161d 0%, #0d1117 100%);
-            border-right: 1px solid var(--stroke);
+            background: var(--canvas-soft);
+            border-right: 1px solid var(--hairline);
+        }
+
+        [data-testid="stSidebar"] h1 {
+            font-family: var(--sans) !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.96px !important;
+            text-transform: uppercase;
+            color: var(--muted) !important;
         }
 
         .block-container {
-            padding-top: 3.8rem;
-            padding-bottom: 2rem;
-            max-width: 1500px;
+            padding-top: 3.5rem;
+            padding-bottom: 96px;
+            max-width: 1200px;
         }
 
+        /* ── 타이포 ── */
+        h1, h2, h3 {
+            font-family: var(--display);
+            font-weight: 300;
+            color: var(--ink);
+        }
+
+        p, span, label, div {
+            font-family: var(--sans);
+        }
+
+        /* Streamlit 은 heading 텍스트를 앵커 링크용 자식 span 으로 감싸고,
+           metric 값도 자식 div 에 넣는다. 위의 포괄 선택자가 그 자식들을 잡아
+           display 폰트를 덮어쓰므로 부모를 상속하도록 되돌린다.
+           (이게 없으면 헤드라인이 세리프로 안 보인다.) */
+        h1 span, h2 span, h3 span,
+        div[data-testid="stMetricValue"] div,
+        div[data-testid="stMetricValue"] span {
+            font-family: inherit;
+            font-weight: inherit;
+            letter-spacing: inherit;
+        }
+
+        /* heading 앵커 링크 아이콘은 에디토리얼 톤에 불필요 */
+        span[data-testid="stHeaderActionElements"] {
+            display: none;
+        }
+
+        /* ── 탭: 밑줄만 남긴 에디토리얼 내비 ── */
         div[data-testid="stTabs"] {
             position: relative;
             z-index: 5;
         }
 
-        div[data-testid="stTabs"] button {
-            border-radius: 8px 8px 0 0;
-            min-height: 46px;
+        div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+            gap: 32px;
+            background: transparent;
+            border-bottom: 1px solid var(--hairline);
         }
 
+        div[data-testid="stTabs"] [data-baseweb="tab"] {
+            background: transparent;
+            padding: 0 0 14px;
+            font-family: var(--sans);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0;
+            color: var(--muted);
+        }
+
+        div[data-testid="stTabs"] [aria-selected="true"] {
+            color: var(--ink);
+        }
+
+        div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+            background: var(--ink);
+            height: 1px;
+        }
+
+        /* ── 스탯 타일 ── */
         div[data-testid="stMetric"] {
-            min-height: 112px;
-            background: var(--panel);
-            border: 1px solid var(--stroke);
-            border-radius: 8px;
-            padding: 16px 18px;
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-radius: var(--rounded-xl);
+            padding: 20px 24px;
+        }
+
+        div[data-testid="stMetricLabel"] p {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.96px !important;
+            text-transform: uppercase;
+            color: var(--muted) !important;
         }
 
         div[data-testid="stMetricValue"] {
-            color: #ffffff;
-            font-size: 1.72rem;
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: 2.4rem;
+            letter-spacing: -0.32px;
+            color: var(--ink);
         }
 
+        /* ── 히어로 ── */
         .hero {
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 8px;
-            padding: 24px 28px;
+            position: relative;
+            overflow: hidden;
+            padding: 72px 0 64px;
+            margin-bottom: 48px;
+            border-bottom: 1px solid var(--hairline);
+        }
+
+        /* 파스텔 orb — 순수 분위기. 콘텐츠를 담지 않는다. */
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: -180px;
+            left: 42%;
+            width: 620px;
+            height: 620px;
+            border-radius: 50%;
             background:
-                linear-gradient(120deg, rgba(255,153,0,0.18), rgba(0,168,225,0.08)),
-                rgba(255, 255, 255, 0.052);
-            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.24);
-            margin: 8px 0 18px;
+                radial-gradient(circle at 32% 34%, var(--orb-mint) 0%, transparent 62%),
+                radial-gradient(circle at 68% 40%, var(--orb-sky) 0%, transparent 60%),
+                radial-gradient(circle at 50% 72%, var(--orb-peach) 0%, transparent 64%);
+            filter: blur(64px);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero .eyebrow {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 0 0 20px;
         }
 
         .hero h1 {
-            margin: 0 0 8px;
-            font-size: clamp(2.1rem, 4vw, 4rem);
-            line-height: 1.04;
-            letter-spacing: 0;
-            color: #ffffff;
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: clamp(2.2rem, 5.2vw, 4rem);
+            line-height: 1.05;
+            letter-spacing: -1.92px;
+            color: var(--ink);
+            margin: 0 0 20px;
         }
 
         .hero p {
-            max-width: 980px;
+            max-width: 620px;
             margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+            letter-spacing: 0.16px;
+            color: var(--body);
+        }
+
+        /* ── 섹션 ── */
+        .section {
+            margin: 96px 0 24px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
             color: var(--muted);
-            font-size: 1.02rem;
-            line-height: 1.6;
-        }
-
-        .section-title {
-            margin: 22px 0 10px;
-            color: #ffffff;
-            font-size: 1.24rem;
-            font-weight: 760;
-        }
-
-        .insight-card {
-            height: 100%;
-            border: 1px solid var(--stroke);
-            border-radius: 8px;
-            padding: 18px;
-            background: var(--panel);
-        }
-
-        .insight-card h3 {
-            margin: 0 0 10px;
-            color: #ffffff;
-            font-size: 1.02rem;
-        }
-
-        .insight-card p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.55;
-        }
-
-        .cluster-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--stroke);
-            background: var(--panel-strong);
-            color: #f5f7fb;
-            font-size: 0.86rem;
             margin-bottom: 10px;
         }
 
+        .section h2 {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: 2.25rem;
+            line-height: 1.17;
+            letter-spacing: -0.36px;
+            color: var(--ink);
+            margin: 0;
+        }
+
+        .section-sub {
+            margin: 10px 0 0;
+            max-width: 620px;
+            font-size: 16px;
+            line-height: 1.5;
+            letter-spacing: 0.16px;
+            color: var(--body);
+        }
+
+        /* ── 카드 ── */
+        /* Streamlit 컬럼에 카드를 하나씩 넣으면 중간 래퍼에 명시적 높이가 없어
+           height:100% 가 해소되지 않아 카드 밑단이 어긋난다. 카드 묶음은
+           st.columns 대신 이 grid 하나로 렌더해 높이를 자동 정렬한다.
+           auto-fit 덕에 좁은 화면에서 2단→1단으로 자연히 접힌다. */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .card {
+            height: 100%;
+            box-sizing: border-box;
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-radius: var(--rounded-xl);
+            padding: 24px;
+            transition: box-shadow 160ms ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--soft-drop);
+        }
+
+        .card h3 {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 1.2;
+            letter-spacing: 0;
+            color: var(--ink);
+            margin: 0 0 10px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.55;
+            letter-spacing: 0.15px;
+            color: var(--body);
+        }
+
+        .card .step {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
+            color: var(--muted-soft);
+            margin: 0 0 12px;
+        }
+
+        /* 세그먼트 배지 — 색 점이 정체성을 나르고, 글자는 잉크를 유지한다. */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px 4px 10px;
+            border-radius: var(--rounded-pill);
+            background: var(--surface-strong);
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
         .dot {
-            width: 9px;
-            height: 9px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             display: inline-block;
         }
 
+        /* ── 플레이스홀더 ── */
         .placeholder {
-            border: 1px dashed rgba(255, 255, 255, 0.24);
-            border-radius: 8px;
-            padding: 28px;
-            background: rgba(255, 255, 255, 0.04);
+            border: 1px dashed var(--hairline-strong);
+            border-radius: var(--rounded-xxl);
+            padding: 48px;
+            background: var(--canvas-soft);
+            color: var(--body);
+            font-size: 15px;
+            line-height: 1.9;
+            letter-spacing: 0.15px;
+        }
+
+        .placeholder strong {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
             color: var(--muted);
+        }
+
+        /* ── 폼: 필 CTA, 8px 인풋 ── */
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            border-radius: var(--rounded-md);
+            border-color: var(--hairline-strong);
+            background: var(--surface-card);
+        }
+
+        .stButton > button {
+            border-radius: var(--rounded-pill);
+            background: var(--primary);
+            color: var(--on-primary);
+            border: none;
+            font-family: var(--sans);
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 20px;
+            height: 40px;
+        }
+
+        .stButton > button:hover {
+            background: var(--primary-active);
+            color: var(--on-primary);
+        }
+
+        /* ── 데이터프레임 ── */
+        div[data-testid="stDataFrame"] {
+            border: 1px solid var(--hairline);
+            border-radius: var(--rounded-lg);
+        }
+
+        [data-testid="stSidebar"] hr {
+            border-color: var(--hairline);
         }
         </style>
         """,
@@ -223,14 +502,41 @@ def mean_value(df: pd.DataFrame, column: str) -> float:
     return float(pd.to_numeric(df[column], errors="coerce").mean())
 
 
+def section(label: str, title: str, sub: str = "") -> None:
+    sub_html = f'<p class="section-sub">{sub}</p>' if sub else ""
+    st.markdown(
+        f"""
+        <div class="section">
+            <div class="section-label">{label}</div>
+            <h2>{title}</h2>
+            {sub_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def card_html(eyebrow: str, title: str, body: str) -> str:
+    """카드 한 장을 만든다.
+
+    HTML 은 반드시 들여쓰기·줄바꿈 없이 한 줄로 만든다. st.markdown 은 4칸 이상
+    들여쓴 줄을 코드 블록으로 해석해서, 들여쓴 카드는 <pre> 로 삼켜진다.
+    """
+    return f'<div class="card">{eyebrow}<h3>{title}</h3><p>{body}</p></div>'
+
+
+def render_card_grid(cards: list[str]) -> None:
+    st.markdown(f'<div class="card-grid">{"".join(cards)}</div>', unsafe_allow_html=True)
+
+
 def axis_style(title: str) -> dict:
     return {
-        "title": title,
-        "showbackground": True,
-        "backgroundcolor": "rgba(255,255,255,0.035)",
-        "gridcolor": "rgba(255,255,255,0.12)",
-        "zerolinecolor": "rgba(255,153,0,0.5)",
-        "color": "rgba(245,247,251,0.78)",
+        "title": {"text": title, "font": {"size": 12, "color": AXIS_TEXT}},
+        "showbackground": False,
+        "gridcolor": GRID,
+        "zerolinecolor": GRID,
+        "color": AXIS_TEXT,
+        "tickfont": {"size": 11, "color": AXIS_TEXT},
     }
 
 
@@ -283,55 +589,62 @@ def make_3d_figure(df: pd.DataFrame) -> go.Figure:
         y="y",
         z="z",
         color="segment_name",
-        symbol="segment_name",
         color_discrete_map=CLUSTER_COLORS,
         hover_data=hover_cols,
         custom_data=["product_id"],
-        opacity=0.74,
-        height=650,
+        opacity=0.82,
+        height=620,
         labels=labels,
     )
-    fig.update_traces(marker={"size": 4, "line": {"width": 0.3, "color": "rgba(255,255,255,0.45)"}})
+    # 겹치는 마크는 서피스 링으로 분리한다.
+    fig.update_traces(marker={"size": 3.4, "line": {"width": 0.5, "color": SURFACE_CARD}})
 
+    # 중심점은 잉크 다이아몬드 — 색이 아니라 형태로 구분한다.
     centroids = df.groupby("segment_name")[["x", "y", "z"]].mean()
-    for segment, row in centroids.iterrows():
-        fig.add_trace(
-            go.Scatter3d(
-                x=[row["x"]],
-                y=[row["y"]],
-                z=[row["z"]],
-                mode="markers",
-                marker={
-                    "size": 10,
-                    "color": "#ffffff",
-                    "symbol": "diamond",
-                    "line": {"color": "#0f1115", "width": 2},
-                },
-                name=f"Centroid - {segment}",
-                showlegend=True,
-            )
+    fig.add_trace(
+        go.Scatter3d(
+            x=centroids["x"],
+            y=centroids["y"],
+            z=centroids["z"],
+            mode="markers",
+            marker={
+                "size": 7,
+                "color": INK,
+                "symbol": "diamond",
+                "line": {"color": SURFACE_CARD, "width": 1},
+            },
+            name="Centroid",
+            hovertext=list(centroids.index),
+            hoverinfo="text",
         )
+    )
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        margin={"l": 0, "r": 0, "t": 12, "b": 0},
+        margin={"l": 0, "r": 0, "t": 8, "b": 0},
         legend={
             "orientation": "h",
             "yanchor": "bottom",
             "y": 1.02,
             "xanchor": "left",
             "x": 0,
-            "font": {"color": "#f5f7fb"},
+            "title": {"text": ""},
+            "font": {"color": BODY, "size": 13, "family": PLOT_FONT},
         },
         scene={
-            "bgcolor": "rgba(255,255,255,0.02)",
+            "bgcolor": "rgba(0,0,0,0)",
             "xaxis": axis_style(labels["x"]),
             "yaxis": axis_style(labels["y"]),
             "zaxis": axis_style(labels["z"]),
             "camera": {"eye": {"x": 1.7, "y": 1.55, "z": 1.15}},
         },
-        font={"color": "#f5f7fb"},
+        font={"color": BODY, "family": PLOT_FONT},
+        hoverlabel={
+            "bgcolor": SURFACE_CARD,
+            "bordercolor": HAIRLINE,
+            "font": {"color": INK, "family": PLOT_FONT, "size": 12},
+        },
     )
     return fig
 
@@ -355,8 +668,7 @@ def insight_text(segment: str) -> tuple[str, str]:
 
 
 def render_sidebar(df: pd.DataFrame) -> tuple[list[str], tuple[float, float], tuple[float, float]]:
-    st.sidebar.title("Control Panel")
-    st.sidebar.caption("상품 세그먼트, 가격대, 별점-감정 괴리 기준으로 발표 중 바로 필터링할 수 있습니다.")
+    st.sidebar.title("Filters")
 
     segments = list(df["segment_name"].dropna().unique())
     selected = st.sidebar.multiselect("상품 세그먼트", options=segments, default=segments)
@@ -370,7 +682,7 @@ def render_sidebar(df: pd.DataFrame) -> tuple[list[str], tuple[float, float], tu
     gap_range = st.sidebar.slider("별점-감정 괴리", gap_min, gap_max, (gap_min, gap_max), format="%.3f")
 
     st.sidebar.divider()
-    st.sidebar.markdown("**Data source**")
+    st.sidebar.caption("Data source")
     st.sidebar.caption("user_segments.csv" if DATA_PATH.exists() else "sample_user_segments.csv")
     return selected, price_range, gap_range
 
@@ -398,10 +710,11 @@ def render_hero(df: pd.DataFrame) -> None:
     st.markdown(
         f"""
         <div class="hero">
-            <h1>Amazon Product Segmentation</h1>
+            <p class="eyebrow">Product Segmentation</p>
+            <h1>별점이 말하지 않는<br>상품의 진짜 신호</h1>
             <p>
-                가격, 텍스트 감정, 별점-감정 괴리, 가격 로그, 리뷰 수 로그를 기반으로 상품을 3개 세그먼트로 나누고,
-                {algo} 결과를 PCA 3D 공간({variance_text} variance)에서 발표용으로 시각화합니다.
+                가격, 텍스트 감정, 별점-감정 괴리, 리뷰 수를 기반으로 상품을 세 세그먼트로 나눕니다.
+                {algo} 결과를 PCA 3D 공간({variance_text} variance)에 펼쳐 탐색합니다.
             </p>
         </div>
         """,
@@ -418,26 +731,17 @@ def render_metrics(df: pd.DataFrame) -> None:
 
 
 def render_cluster_cards(summary: pd.DataFrame) -> None:
-    st.markdown('<div class="section-title">Segment Playbook</div>', unsafe_allow_html=True)
-    cols = st.columns(min(3, max(1, len(summary))))
-    for i, row in summary.iterrows():
+    section("Playbook", "세그먼트별 운영 전략", "각 군집이 무엇을 뜻하고, 무엇을 해야 하는지.")
+    cards = []
+    for _, row in summary.iterrows():
         title, body = insight_text(row["segment"])
-        color = CLUSTER_COLORS.get(row["segment"], "#ff9900")
-        with cols[i % len(cols)]:
-            st.markdown(
-                f"""
-                <div class="insight-card">
-                    <div class="cluster-chip"><span class="dot" style="background:{color}"></span>{row["segment"]}</div>
-                    <h3>{title}</h3>
-                    <p>{body}</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        color = CLUSTER_COLORS.get(row["segment"], INK)
+        cards.append(card_html(f'<div class="badge"><span class="dot" style="background:{color}"></span>{row["segment"]}</div>', title, body))
+    render_card_grid(cards)
 
 
 def render_detail_panel(df: pd.DataFrame, selected_product_id: str | None) -> None:
-    st.markdown('<div class="section-title">Product Detail</div>', unsafe_allow_html=True)
+    section("Detail", "상품 상세", "3D 맵에서 점을 클릭하면 해당 상품이 여기에 연결됩니다.")
     if df.empty:
         st.info("필터 조건에 맞는 상품이 없습니다.")
         return
@@ -449,11 +753,19 @@ def render_detail_panel(df: pd.DataFrame, selected_product_id: str | None) -> No
     product_id = label.split(" | ", 1)[0]
     product = df[df["product_id"].astype(str) == product_id].iloc[0]
 
+    # 세그먼트명은 배지로 — 스탯 타일에 넣으면 긴 한글이 잘린다(타일은 숫자용).
+    segment = str(product.get("segment_name", "-"))
+    color = CLUSTER_COLORS.get(segment, INK)
+    st.markdown(
+        f'<div class="badge"><span class="dot" style="background:{color}"></span>{segment}</div>',
+        unsafe_allow_html=True,
+    )
+
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Segment", str(product.get("segment_name", "-")))
-    c2.metric("Price", fmt_rs(pd.to_numeric(product.get("actual_price", np.nan), errors="coerce")))
-    c3.metric("Rating", f"{float(product.get('rating', np.nan)):.2f}")
-    c4.metric("Rating Gap", f"{float(product.get('rating_gap', np.nan)):.3f}")
+    c1.metric("Price", fmt_rs(pd.to_numeric(product.get("actual_price", np.nan), errors="coerce")))
+    c2.metric("Rating", f"{float(product.get('rating', np.nan)):.2f}")
+    c3.metric("Rating Gap", f"{float(product.get('rating_gap', np.nan)):.3f}")
+    c4.metric("Reviews", f"{pd.to_numeric(product.get('rating_count', np.nan), errors='coerce'):,.0f}")
 
     show_cols = [
         col
@@ -475,48 +787,37 @@ def render_detail_panel(df: pd.DataFrame, selected_product_id: str | None) -> No
 
 
 def render_model_notes() -> None:
-    st.markdown('<div class="section-title">Model Story</div>', unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown(
-            """
-            <div class="insight-card">
-                <h3>1. Feature Engineering</h3>
-                <p>할인율, 텍스트 감정, 별점-감정 괴리, 로그 가격, 로그 리뷰 수를 사용해 상품의 가격·만족도·신뢰도 구조를 만들었습니다.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with c2:
-        st.markdown(
-            """
-            <div class="insight-card">
-                <h3>2. Model Selection</h3>
-                <p>K-Means와 GMM을 비교하고, 발표 해석성을 위해 k=3 세그먼트를 사용했습니다. 최종 결과는 PCA 3D로 압축해 보여줍니다.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with c3:
-        st.markdown(
-            """
-            <div class="insight-card">
-                <h3>3. Business Action</h3>
-                <p>각 세그먼트를 품질 점검, 프리미엄 유지, 리뷰 노출 강화 전략으로 연결해 실무 의사결정에 바로 사용할 수 있게 했습니다.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    section("Method", "모델 이야기", "피처 설계에서 운영 액션까지 세 단계.")
+    steps = [
+        (
+            "01",
+            "Feature Engineering",
+            "할인율, 텍스트 감정, 별점-감정 괴리, 로그 가격, 로그 리뷰 수를 사용해 상품의 가격·만족도·신뢰도 구조를 만들었습니다.",
+        ),
+        (
+            "02",
+            "Model Selection",
+            "K-Means와 GMM을 세 지표로 비교하고, 발표 해석성을 위해 k=3 세그먼트를 사용했습니다. 최종 결과는 PCA 3D로 압축했습니다.",
+        ),
+        (
+            "03",
+            "Business Action",
+            "각 세그먼트를 품질 점검, 프리미엄 유지, 리뷰 노출 강화 전략으로 연결해 실무 의사결정에 바로 사용할 수 있게 했습니다.",
+        ),
+    ]
+    render_card_grid(
+        [card_html(f'<p class="step">{step}</p>', title, body) for step, title, body in steps]
+    )
 
 
 def render_first_tab(filtered: pd.DataFrame) -> None:
     render_hero(filtered)
     render_metrics(filtered)
 
+    section("Map", "3D 세그먼테이션 맵", "회전·확대해 군집 구조를 살펴보고, 점을 클릭해 상품을 선택합니다.")
     left, right = st.columns([1.55, 1], gap="large")
     selected_product = None
     with left:
-        st.markdown('<div class="section-title">3D Product Segmentation Map</div>', unsafe_allow_html=True)
         fig = make_3d_figure(filtered)
         try:
             event = st.plotly_chart(
@@ -534,29 +835,43 @@ def render_first_tab(filtered: pd.DataFrame) -> None:
 
     with right:
         summary = cluster_summary(filtered)
-        st.markdown('<div class="section-title">Segment Comparison</div>', unsafe_allow_html=True)
         if summary.empty:
             st.info("필터 조건에 맞는 세그먼트가 없습니다.")
         else:
             chart = px.bar(
                 summary,
-                x="segment",
-                y="products",
+                x="products",
+                y="segment",
+                orientation="h",
                 color="segment",
                 color_discrete_map=CLUSTER_COLORS,
                 text="products",
             )
+            chart.update_traces(
+                textposition="outside",
+                textfont={"color": BODY, "family": PLOT_FONT, "size": 12},
+                marker={"line": {"width": 0}},
+                width=0.5,
+                cliponaxis=False,
+            )
             chart.update_layout(
-                height=300,
+                height=260,
                 showlegend=False,
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                margin={"l": 0, "r": 0, "t": 10, "b": 0},
-                font={"color": "#f5f7fb"},
-                xaxis={"title": None, "tickangle": -14},
-                yaxis={"title": "Products", "gridcolor": "rgba(255,255,255,0.12)"},
+                margin={"l": 0, "r": 28, "t": 8, "b": 0},
+                font={"color": BODY, "family": PLOT_FONT},
+                bargap=0.42,
+                xaxis={"visible": False},
+                yaxis={
+                    "title": None,
+                    "showgrid": False,
+                    "ticksuffix": "  ",
+                    "tickfont": {"color": INK, "size": 13},
+                },
             )
             st.plotly_chart(chart, use_container_width=True)
+
             table = summary.copy()
             table["avg_price"] = table["avg_price"].map(fmt_rs)
             table["avg_discount"] = table["avg_discount"].map(fmt_pct)
@@ -569,7 +884,7 @@ def render_first_tab(filtered: pd.DataFrame) -> None:
     render_detail_panel(filtered, selected_product)
     render_model_notes()
 
-    st.markdown('<div class="section-title">Filtered Product Data</div>', unsafe_allow_html=True)
+    section("Data", "필터링된 상품 데이터")
     show_cols = [
         col
         for col in [
@@ -593,8 +908,9 @@ def render_teammate_tab(number: int) -> None:
     st.markdown(
         f"""
         <div class="hero">
-            <h1>Analysis Track {number}</h1>
-            <p>팀원이 자신의 분석 주제, 핵심 시각화, 주요 지표, 실무 적용 방안을 채우는 공간입니다.</p>
+            <p class="eyebrow">Analysis Track {number}</p>
+            <h1>아직 비어 있는<br>분석 트랙</h1>
+            <p>분석 주제, 핵심 시각화, 주요 지표, 실무 적용 방안을 채우는 공간입니다.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -602,12 +918,12 @@ def render_teammate_tab(number: int) -> None:
     st.markdown(
         """
         <div class="placeholder">
-            <strong>Recommended structure</strong><br>
-            1. 분석 질문과 데이터 설명<br>
-            2. 핵심 지표 3-4개<br>
-            3. 메인 시각화<br>
-            4. 인사이트와 비즈니스 액션<br>
-            5. 한계점과 다음 실험
+            <strong>Recommended structure</strong>
+            01 &nbsp; 분석 질문과 데이터 설명<br>
+            02 &nbsp; 핵심 지표 3-4개<br>
+            03 &nbsp; 메인 시각화<br>
+            04 &nbsp; 인사이트와 비즈니스 액션<br>
+            05 &nbsp; 한계점과 다음 실험
         </div>
         """,
         unsafe_allow_html=True,
@@ -620,7 +936,7 @@ def main() -> None:
     selected_segments, price_range, gap_range = render_sidebar(df)
     filtered = apply_filters(df, selected_segments, price_range, gap_range)
 
-    tab1, tab2, tab3 = st.tabs(["1. Product Segmentation", "2. Teammate Analysis", "3. Teammate Analysis"])
+    tab1, tab2, tab3 = st.tabs(["Product Segmentation", "Analysis Track 2", "Analysis Track 3"])
     with tab1:
         render_first_tab(filtered)
     with tab2:

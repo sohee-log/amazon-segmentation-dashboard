@@ -1,9 +1,11 @@
+# 에디토리얼 매거진 톤: off-white 캔버스 + 웜 니어블랙 잉크.
+# 채도 높은 CTA 색을 두지 않는다 — primaryColor 는 잉크 그 자체.
 [theme]
-base = "dark"
-primaryColor = "#ff9900"
-backgroundColor = "#0f1115"
-secondaryBackgroundColor = "#171b22"
-textColor = "#f5f7fb"
+base = "light"
+primaryColor = "#292524"          # ink — 유일한 액션 색
+backgroundColor = "#f5f5f5"       # canvas
+secondaryBackgroundColor = "#ffffff"  # surface-card
+textColor = "#0c0a09"             # ink
 font = "sans serif"
 
 [server]
