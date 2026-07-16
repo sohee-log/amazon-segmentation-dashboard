@@ -60,14 +60,11 @@ def inject_css() -> None:
     st.markdown(
         """
         <style>
-        /* display 는 Noto Serif KR 300 단일 패밀리.
-           Waldenburg(라이선스)의 대체로 Cormorant Garamond 를 라틴에 물려봤으나,
-           한글은 글리프가 없어 Noto Serif KR 이 받게 되면서 한 헤딩 안에서
-           cap-height 가 어긋나고 Cormorant 의 올드스타일 숫자 탓에 "3D" 가
-           "₃D" 로 읽히는 문제가 있었다. 화면이 대부분 한글이므로 라틴·한글이
-           한 폰트 안에서 조화되는 Noto Serif KR 로 통일한다 — weight 300 유지.
-           본문은 Inter + Noto Sans KR 로 고정해 OS 별 폴백 편차를 없앤다. */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500&display=swap');
+        /* 모던 고딕 하나로 통일 — Inter(라틴) + Noto Sans KR(한글).
+           헤드라인은 굵은 웨이트(700)에 타이트한 자간으로 세련된 인상을 주고,
+           본문은 400/500 으로 가독성을 지킨다. OS 별 폴백 편차를 없애기 위해
+           한글 글리프를 Noto Sans KR 로 고정한다. */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap');
 
         :root {
             --ink: #0c0a09;
@@ -91,8 +88,8 @@ def inject_css() -> None:
             --orb-sky: #a8c8e8;
             --orb-rose: #e8b8c4;
 
-            /* 라틴·한글을 한 패밀리로 — 혼용 헤딩에서 크기가 어긋나지 않는다. */
-            --display: 'Noto Serif KR', 'EB Garamond', serif;
+            /* display 와 body 모두 같은 고딕 스택 — 위계는 웨이트와 크기로 만든다. */
+            --display: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             --sans: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
 
             --rounded-md: 8px;
@@ -143,7 +140,7 @@ def inject_css() -> None:
         /* ── 타이포 ── */
         h1, h2, h3 {
             font-family: var(--display);
-            font-weight: 300;
+            font-weight: 700;
             color: var(--ink);
         }
 
@@ -217,9 +214,9 @@ def inject_css() -> None:
 
         div[data-testid="stMetricValue"] {
             font-family: var(--display);
-            font-weight: 300;
-            font-size: 2.4rem;
-            letter-spacing: -0.32px;
+            font-weight: 600;
+            font-size: 2.2rem;
+            letter-spacing: -0.6px;
             color: var(--ink);
         }
 
@@ -266,10 +263,10 @@ def inject_css() -> None:
 
         .hero h1 {
             font-family: var(--display);
-            font-weight: 300;
+            font-weight: 800;
             font-size: clamp(2.2rem, 5.2vw, 4rem);
-            line-height: 1.05;
-            letter-spacing: -1.92px;
+            line-height: 1.08;
+            letter-spacing: -1.6px;
             color: var(--ink);
             margin: 0 0 20px;
         }
@@ -299,10 +296,10 @@ def inject_css() -> None:
 
         .section h2 {
             font-family: var(--display);
-            font-weight: 300;
-            font-size: 2.25rem;
-            line-height: 1.17;
-            letter-spacing: -0.36px;
+            font-weight: 700;
+            font-size: 2rem;
+            line-height: 1.2;
+            letter-spacing: -0.8px;
             color: var(--ink);
             margin: 0;
         }
@@ -344,10 +341,10 @@ def inject_css() -> None:
 
         .card h3 {
             font-family: var(--display);
-            font-weight: 300;
-            font-size: 1.5rem;
-            line-height: 1.2;
-            letter-spacing: 0;
+            font-weight: 600;
+            font-size: 1.3rem;
+            line-height: 1.25;
+            letter-spacing: -0.4px;
             color: var(--ink);
             margin: 0 0 10px;
         }
