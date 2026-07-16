@@ -11,6 +11,8 @@
   <img alt="License" src="https://img.shields.io/badge/License-MIT-green">
 </p>
 
+![대시보드 화면](docs/dashboard-hero.png)
+
 ---
 
 ## 프로젝트 소개
@@ -97,6 +99,8 @@ Kaggle [`karkavelrajaj/amazon-sales-dataset`](https://www.kaggle.com/datasets/ka
 
 ## 대시보드 기능
 
+![3D 세그먼테이션 맵](docs/dashboard-map.png)
+
 - **3D 세그먼테이션 맵** — 회전 · 확대 가능한 Plotly 산점도, 세그먼트별 중심점(centroid) 표시
 - **포인트 클릭 → 상품 상세** — 그래프에서 점을 클릭하면 해당 상품 정보가 아래 패널에 연결
 - **실시간 필터** — 사이드바에서 세그먼트 · 가격대 · 괴리 범위로 즉시 필터링
@@ -116,6 +120,30 @@ python scripts/export_segments.py
 
 Kaggle 데이터셋을 자동 다운로드하므로 [Kaggle API 인증](https://www.kaggle.com/docs/api#authentication)이 필요합니다.
 실행하면 `data/user_segments.csv`, `data/sample_user_segments.csv`, `data/model_metrics.csv` 가 갱신됩니다.
+
+---
+
+## 디자인
+
+에디토리얼 매거진 톤을 따릅니다. off-white 캔버스(`#f5f5f5`)에 웜 니어블랙 잉크(`#0c0a09`),
+채도 높은 CTA 색은 두지 않고, 파스텔 그라디언트 orb가 유일한 "색" 순간입니다.
+display는 **weight 300**(Noto Serif KR), 본문은 Inter + Noto Sans KR, 섹션 리듬은 96px.
+
+### 차트 색을 따로 파생시킨 이유
+
+브랜드의 파스텔 orb(mint · peach · lavender · sky · rose)는 **분위기 전용**이라 데이터 마크로 쓸 수 없습니다.
+off-white 캔버스 위에서 대비가 무너지기 때문입니다. 그래서 **같은 hue 계보는 유지하되 명도만 낮춘**
+데이터 전용 팔레트를 파생시켰습니다.
+
+| 세그먼트 | orb 계보 | 데이터 색 |
+|---|---|---|
+| 관심 필요 상품 | peach | `#b45309` |
+| 프리미엄 베스트셀러 | sky | `#2563a8` |
+| 가성비 호평 상품 | mint | `#0d9488` |
+
+세 색은 대비(≥3:1) · 채도 하한 · 색각 이상 분리도(all-pairs)를 모두 통과합니다.
+색만으로 정보를 나르지 않도록 범례를 항상 띄우고, 배지는 **점만 세그먼트 색이고 글자는 잉크**를 유지하며,
+중심점은 색이 아니라 형태(잉크 다이아몬드)로 구분합니다.
 
 ---
 
