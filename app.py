@@ -8,16 +8,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 from model2_trust_tab import render as render_trust_tab
+from model3_alert_tab import render as render_alert_tab
+from segment_naming import ATTENTION, PREMIUM, VALUE, assign_segment_names
 
 APP_DIR = Path(__file__).parent
 DATA_PATH = APP_DIR / "data" / "user_segments.csv"
 SAMPLE_PATH = APP_DIR / "data" / "sample_user_segments.csv"
-
-SEGMENT_NAMES = {
-    "0": "관심 필요 상품",
-    "1": "프리미엄 베스트셀러",
-    "2": "가성비 호평 상품",
-}
 
 # --- 디자인 토큰 -------------------------------------------------------------
 # 에디토리얼 톤: off-white 캔버스, 웜 니어블랙 잉크, 채도 높은 CTA 색 없음.
@@ -32,16 +28,12 @@ SURFACE_CARD = "#ffffff"
 # 데이터 마크로 쓸 수 없다(off-white 위에서 대비가 무너짐).
 # 그래서 같은 hue 계보를 유지한 채 명도만 낮춘 데이터 전용 팔레트를 파생시킨다.
 # scripts/validate_palette 기준 전 항목 통과(대비·채도·색각 분리).
-SEGMENT_COLORS = {
-    "관심 필요 상품": "#b45309",      # peach 계보
-    "프리미엄 베스트셀러": "#2563a8",  # sky 계보
-    "가성비 호평 상품": "#0d9488",     # mint 계보
-}
+# 색은 세그먼트명에만 건다 — 클러스터 번호는 임의로 붙으므로 번호에 색을 고정하면
+# 재학습 때 색이 뒤바뀐다(이름이 뒤바뀐 것과 같은 원인).
 CLUSTER_COLORS = {
-    **SEGMENT_COLORS,
-    "0": SEGMENT_COLORS["관심 필요 상품"],
-    "1": SEGMENT_COLORS["프리미엄 베스트셀러"],
-    "2": SEGMENT_COLORS["가성비 호평 상품"],
+    ATTENTION: "#b45309",  # peach 계보
+    PREMIUM: "#2563a8",    # sky 계보
+    VALUE: "#0d9488",      # mint 계보
 }
 
 # orb 는 순수 분위기 — 마크·텍스트에는 절대 쓰지 않는다.
@@ -400,27 +392,6 @@ def inject_css() -> None:
             display: inline-block;
         }
 
-        /* ── 플레이스홀더 ── */
-        .placeholder {
-            border: 1px dashed var(--hairline-strong);
-            border-radius: var(--rounded-xxl);
-            padding: 48px;
-            background: var(--canvas-soft);
-            color: var(--body);
-            font-size: 15px;
-            line-height: 1.9;
-            letter-spacing: 0.15px;
-        }
-
-        .placeholder strong {
-            display: block;
-            margin-bottom: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.96px;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
 
         /* ── 폼: 필 CTA, 8px 인풋 ── */
         div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
@@ -476,7 +447,11 @@ def load_segments() -> pd.DataFrame:
 
     df["cluster"] = df["cluster"].astype(str)
     if "segment_name" not in df.columns:
-        df["segment_name"] = df["cluster"].map(SEGMENT_NAMES).fillna("Segment " + df["cluster"])
+        # 번호로 이름을 찍지 않고 군집 통계에서 유도한다.
+        try:
+            df["segment_name"] = df["cluster"].map(assign_segment_names(df))
+        except ValueError:
+            df["segment_name"] = "Segment " + df["cluster"]
     if "product_id" not in df.columns:
         df["product_id"] = df.index.astype(str)
     if "product_name" not in df.columns:
@@ -651,17 +626,20 @@ def make_3d_figure(df: pd.DataFrame) -> go.Figure:
 
 def insight_text(segment: str) -> tuple[str, str]:
     mapping = {
-        "관심 필요 상품": (
+        ATTENTION: (
             "별점 인플레이션 위험군",
-            "별점은 높지만 텍스트 감정이 낮고 괴리가 큰 상품군입니다. 품질, 배송, 상세 설명 문제를 우선 점검해야 합니다.",
+            "저가·대량 리뷰 상품군입니다. 별점은 4.1대를 유지하지만 텍스트 감정이 가장 낮아 괴리가 가장 큽니다. "
+            "품질, 배송, 상세 설명을 우선 점검해야 합니다.",
         ),
-        "프리미엄 베스트셀러": (
+        PREMIUM: (
             "고가·고인기 신뢰 상품",
-            "가격과 리뷰 수가 높은 핵심 상품군입니다. 과도한 할인보다 브랜드 신뢰와 로열티 전략이 더 적합합니다.",
+            "가격과 리뷰 수가 모두 높은 핵심 상품군입니다. 괴리도 큰 편이라 과도한 할인보다 "
+            "브랜드 신뢰와 로열티 전략이 더 적합합니다.",
         ),
-        "가성비 호평 상품": (
+        VALUE: (
             "정직한 만족 신호",
-            "별점은 상대적으로 보수적이지만 텍스트 감성이 좋은 상품군입니다. 긍정 리뷰 노출과 추천 강화로 전환을 높일 수 있습니다.",
+            "별점은 가장 낮지만 텍스트 감정이 가장 높아 괴리가 가장 작은 상품군입니다. "
+            "리뷰 신뢰도가 높으므로 긍정 리뷰 노출과 추천 강화로 전환을 높일 수 있습니다.",
         ),
     }
     return mapping.get(segment, ("Segment strategy", "세그먼트별 가격, 감정, 괴리 지표를 기준으로 운영 전략을 분리할 수 있습니다."))
@@ -904,45 +882,19 @@ def render_first_tab(filtered: pd.DataFrame) -> None:
     st.dataframe(filtered[show_cols], use_container_width=True, hide_index=True)
 
 
-def render_teammate_tab(number: int) -> None:
-    st.markdown(
-        f"""
-        <div class="hero">
-            <p class="eyebrow">Analysis Track {number}</p>
-            <h1>아직 비어 있는<br>분석 트랙</h1>
-            <p>분석 주제, 핵심 시각화, 주요 지표, 실무 적용 방안을 채우는 공간입니다.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        """
-        <div class="placeholder">
-            <strong>Recommended structure</strong>
-            01 &nbsp; 분석 질문과 데이터 설명<br>
-            02 &nbsp; 핵심 지표 3-4개<br>
-            03 &nbsp; 메인 시각화<br>
-            04 &nbsp; 인사이트와 비즈니스 액션<br>
-            05 &nbsp; 한계점과 다음 실험
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 def main() -> None:
     inject_css()
     df = load_segments()
     selected_segments, price_range, gap_range = render_sidebar(df)
     filtered = apply_filters(df, selected_segments, price_range, gap_range)
 
-    tab1, tab2, tab3 = st.tabs(["Product Segmentation", "Review Trust Score", "Analysis Track 3"])
+    tab1, tab2, tab3 = st.tabs(["Product Segmentation", "Review Trust Score", "Early Warning"])
     with tab1:
         render_first_tab(filtered)
     with tab2:
         render_trust_tab()
     with tab3:
-        render_teammate_tab(3)
+        render_alert_tab()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import kagglehub
@@ -18,6 +19,10 @@ from textblob import TextBlob
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))  # 저장소 루트의 segment_naming 을 쓰기 위해
+
+from segment_naming import assign_segment_names  # noqa: E402
+
 OUT_PATH = REPO_ROOT / "data" / "user_segments.csv"
 METRICS_PATH = REPO_ROOT / "data" / "model_metrics.csv"
 SAMPLE_PATH = REPO_ROOT / "data" / "sample_user_segments.csv"
@@ -105,13 +110,8 @@ def main() -> None:
     result["y"] = coords3[:, 1]
     result["z"] = coords3[:, 2]
     result["cluster"] = labels.astype(str)
-    result["segment_name"] = result["cluster"].map(
-        {
-            "0": "관심 필요 상품",
-            "1": "프리미엄 베스트셀러",
-            "2": "가성비 호평 상품",
-        }
-    )
+    # 클러스터 번호는 임의로 붙으므로 이름을 번호에 고정하지 않고 통계에서 유도한다.
+    result["segment_name"] = result["cluster"].map(assign_segment_names(result))
     result["product_id"] = result.get("product_id", pd.Series(result.index, index=result.index)).astype(str)
     result["product_name"] = result.get("product_name", pd.Series("", index=result.index)).astype(str)
     result["category"] = result.get("category", pd.Series("", index=result.index)).astype(str)
