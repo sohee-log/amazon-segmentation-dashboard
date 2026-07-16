@@ -48,18 +48,22 @@ streamlit run app.py
 ```text
 amazon-segmentation-dashboard/
 ├── app.py                              # Streamlit 대시보드 (진입점)
+├── model2_trust_tab.py                 # Tab 2 — 리뷰 신뢰도 점수
+├── export_trust_model.py               # Tab 2 모델 학습 → models/ 생성
 ├── data/
 │   ├── user_segments.csv               # 분석 결과 — 대시보드가 읽는 메인 데이터
 │   ├── sample_user_segments.csv        # 폴백용 샘플 (메인 데이터 없을 때 사용)
-│   └── model_metrics.csv               # k=2~6 KMeans/GMM 성능 비교표
+│   ├── model_metrics.csv               # k=2~6 KMeans/GMM 성능 비교표
+│   └── review_trust_samples.csv        # Tab 2 샘플 리뷰
+├── models/                             # Tab 2 학습된 파이프라인 (joblib)
 ├── notebooks/
 │   └── 01_product_segmentation.ipynb   # 전처리 → 모델링 → 검증 전 과정
 ├── scripts/
 │   └── export_segments.py              # 노트북 로직 재현 → data/*.csv 생성
-├── members/                            # 팀원별 개인 작업 공간
+├── members/                            # 팀원별 분석 문서
 ├── .streamlit/config.toml              # 테마 설정
 ├── requirements.txt                    # 대시보드 실행용
-└── requirements-pipeline.txt           # 데이터 재생성용
+└── requirements-pipeline.txt           # 데이터·모델 재생성용
 ```
 
 ---
@@ -105,7 +109,8 @@ Kaggle [`karkavelrajaj/amazon-sales-dataset`](https://www.kaggle.com/datasets/ka
 - **포인트 클릭 → 상품 상세** — 그래프에서 점을 클릭하면 해당 상품 정보가 아래 패널에 연결
 - **실시간 필터** — 사이드바에서 세그먼트 · 가격대 · 괴리 범위로 즉시 필터링
 - **세그먼트 플레이북** — 각 군집의 해석과 운영 액션 제안
-- **탭 구조** — Tab 1은 상품 세그먼테이션, Tab 2 · 3은 팀원 분석 트랙
+- **Tab 2 · 리뷰 신뢰도 점수** — 리뷰 텍스트를 입력하면 VADER 감성 · 어휘 다양성 · 길이 · 긍부정 키워드를
+  조합한 자체 정의 신뢰도 점수(0~100)를 예측합니다. 허위 리뷰 정답 라벨이 없으므로 **참고용 보조 지표**입니다.
 
 ---
 
@@ -151,11 +156,11 @@ off-white 캔버스 위에서 대비가 무너지기 때문입니다. 그래서 
 
 DACOS Team 2 토이 프로젝트입니다. 각 팀원의 작업은 [`members/`](members/) 폴더에 있습니다.
 
-| 담당 | 폴더 | 파트 |
+| 담당 | 파트 | 상태 |
 |---|---|---|
-| sohee | [`members/sohee/`](members/sohee/) | Tab 1 — 상품 세그먼테이션 · 대시보드 |
-| 팀원 B | [`members/member2/`](members/member2/) | Tab 2 — 분석 트랙 |
-| 팀원 C | [`members/member3/`](members/member3/) | Tab 3 — 분석 트랙 |
+| sohee | Tab 1 — 상품 세그먼테이션 · 대시보드 | 연결됨 |
+| hjm00502-eng | Tab 2 — [리뷰 신뢰도 점수](members/member2/) | 연결됨 |
+| heeseon25 | Tab 3 — [불만 고객 조기 경보](members/member3/) | 분석 완료, 탭 연결 대기 |
 
 협업 규칙과 시작 가이드는 [`members/README.md`](members/README.md) 를 참고하세요.
 

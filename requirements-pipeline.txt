@@ -1,7 +1,8 @@
-# 데이터 재생성용 — python scripts/export_segments.py
+# 데이터·모델 재생성용
+#   python scripts/export_segments.py     → data/user_segments.csv, model_metrics.csv
+#   python export_trust_model.py          → models/trust_pipeline.joblib, trust_meta.json
 # 대시보드만 실행할 거면 requirements.txt 만 설치하면 된다.
 -r requirements.txt
 
-scikit-learn>=1.5
 kagglehub>=0.3
 textblob>=0.18

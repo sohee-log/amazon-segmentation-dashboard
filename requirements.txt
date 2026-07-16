@@ -3,3 +3,8 @@ streamlit>=1.36
 pandas>=2.2
 numpy>=1.26
 plotly>=5.22
+
+# Tab 2 (리뷰 신뢰도 점수) — app.py 가 model2_trust_tab 을 import 하므로 필수
+joblib>=1.4
+nltk>=3.8
+scikit-learn>=1.5
