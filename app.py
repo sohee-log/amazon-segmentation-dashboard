@@ -423,6 +423,227 @@ def inject_css() -> None:
         [data-testid="stSidebar"] hr {
             border-color: var(--hairline);
         }
+
+        /* ── 프로세스 플로우 (Tab 3) ── */
+        /* 카드 안에 5단계 파이프라인을 얹는다. 색이 아니라 번호·아이콘·순서로 읽힌다. */
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .flow-step {
+            text-align: center;
+            padding: 16px 8px;
+            border-radius: var(--rounded-lg);
+            background: var(--canvas-soft);
+            border: 1px solid var(--hairline);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .flow-step .ico { display: block; font-size: 22px; margin-bottom: 8px; }
+        .flow-step .n {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
+            color: var(--muted-soft);
+            margin-bottom: 6px;
+        }
+
+        /* ── 인사이트 리스트 / 미니 KPI ── */
+        .insight-list {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--body);
+            line-height: 1.75;
+            font-size: 14.5px;
+        }
+        .insight-list strong { color: var(--ink); }
+
+        .mini-kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .mini-kpi {
+            background: var(--surface-strong);
+            border-radius: var(--rounded-lg);
+            padding: 14px 12px;
+            text-align: center;
+        }
+        .mini-kpi b {
+            display: block;
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.4px;
+            color: var(--ink);
+        }
+        .mini-kpi span {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ── 위험도 미터 (Tab 3 결과) ── */
+        /* 심각도는 색이 아니라 채움 길이로 읽힌다. 색은 보조 신호일 뿐이다. */
+        .risk-meter { margin: 4px 0 22px; }
+        .meter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+        .meter-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.96px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .meter-value {
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.4px;
+            color: var(--ink);
+        }
+        .meter-track {
+            height: 10px;
+            border-radius: var(--rounded-pill);
+            background: var(--surface-strong);
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            border-radius: var(--rounded-pill);
+        }
+
+        /* ── 시그널 카드 (감정 · 키워드 · 길이) ── */
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 4px 0 4px;
+        }
+        .signal-card {
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-radius: var(--rounded-lg);
+            padding: 16px 18px;
+        }
+        .signal-card .lbl {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            margin-bottom: 8px;
+        }
+        .signal-card .val {
+            display: block;
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 1.7rem;
+            letter-spacing: -0.6px;
+            color: var(--ink);
+        }
+        .signal-card .tag {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: var(--rounded-pill);
+            background: var(--surface-strong);
+            color: var(--ink);
+        }
+
+        /* ── 근거 테이블 (감지 신호 → 분석 결과 → 위험 수준) ── */
+        .reason-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 8px 0 4px;
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-radius: var(--rounded-lg);
+            overflow: hidden;
+        }
+        .reason-table th, .reason-table td {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--hairline-soft);
+            color: var(--body);
+        }
+        .reason-table th {
+            background: var(--surface-strong);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+        .reason-table td:first-child { color: var(--ink); font-weight: 500; }
+        .reason-table tr:last-child td { border-bottom: none; }
+
+        /* ── 인사이트 / 권장 대응 박스 ── */
+        .insight-box {
+            background: var(--surface-card);
+            border: 1px solid var(--hairline);
+            border-left: 3px solid var(--ink);
+            border-radius: var(--rounded-lg);
+            padding: 16px 18px;
+            line-height: 1.7;
+            color: var(--body);
+            font-size: 14px;
+            margin-top: 14px;
+        }
+        .insight-box strong { color: var(--ink); }
+
+        .action-box {
+            margin-top: 12px;
+            padding: 16px 18px;
+            border-radius: var(--rounded-lg);
+            background: var(--ink);
+            color: #e7e5e4;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+        .action-box strong { color: #ffffff; }
+
+        /* ── 키워드 칩 ── */
+        .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .chip {
+            padding: 5px 12px;
+            background: var(--surface-strong);
+            color: var(--ink);
+            border-radius: var(--rounded-pill);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* ── 진행형 대응 강조(리스트 안 상태 뱃지) ── */
+        .lvl-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px 4px 10px;
+            border-radius: var(--rounded-pill);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            background: var(--surface-strong);
+            color: var(--ink);
+        }
+
+        @media (max-width: 820px) {
+            .flow, .signal-grid, .mini-kpi-row { grid-template-columns: 1fr; }
+        }
         </style>
         """,
         unsafe_allow_html=True,
